@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 import random
+import bcrypt
 import database, models
 
 app = FastAPI()
