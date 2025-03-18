@@ -17,17 +17,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class LoginRequest(BaseModel):
+class AuthRequest(BaseModel):
     email: str
     password: str = None
-    message: str = None
 
 class ChatRequest(BaseModel):
     email: str
     message: str
 
 @app.post("/register")
-def register(data: LoginRequest):
+def register(data: AuthRequest):
     db = database.SessionLocal()
     user = db.query(models.User).filter(models.User.email == data.email).first()
     if user:
@@ -42,7 +41,7 @@ def register(data: LoginRequest):
     return {"message": "Registration successful"}
 
 @app.post("/login")
-def login(data: LoginRequest):
+def login(data: AuthRequest):
     db = database.SessionLocal()
     user = db.query(models.User).filter(models.User.email == data.email).first()
     if not user:
