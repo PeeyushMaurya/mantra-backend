@@ -8,10 +8,9 @@ import database, models
 app = FastAPI()
 models.Base.metadata.create_all(bind=database.engine)
 
-origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["https://peeyushmaurya.github.io"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
