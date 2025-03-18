@@ -19,21 +19,42 @@ app.add_middleware(
 
 class LoginRequest(BaseModel):
     email: str
+    password: str = None
+    message: str = None
 
 class ChatRequest(BaseModel):
     email: str
     message: str
 
+@app.post("/register")
+def register(data: LoginRequest):
+    db = database.SessionLocal()
+    user = db.query(models.User).filter(models.User.email == data.email).first()
+    if user:
+        db.close()
+        return {"message": "Email already registered"}
+
+    hashed_password = bcrypt.hashpw(data.password.encode(), bcrypt.gensalt()).decode()
+    new_user = models.User(email=data.email, password=hashed_password)
+    db.add(new_user)
+    db.commit()
+    db.close()
+    return {"message": "Registration successful"}
+
 @app.post("/login")
-def login_user(data: LoginRequest):
+def login(data: LoginRequest):
     db = database.SessionLocal()
     user = db.query(models.User).filter(models.User.email == data.email).first()
     if not user:
-        new_user = models.User(email=data.email)
-        db.add(new_user)
-        db.commit()
+        db.close()
+        return {"success": False, "message": "User not found"}
+    
+    if not bcrypt.checkpw(data.password.encode(), user.password.encode()):
+        db.close()
+        return {"success": False, "message": "Incorrect password"}
+    
     db.close()
-    return {"message": "User logged in"}
+    return {"success": True, "message": "Login successful"}
 
 @app.post("/chat")
 def chat(data: ChatRequest):
